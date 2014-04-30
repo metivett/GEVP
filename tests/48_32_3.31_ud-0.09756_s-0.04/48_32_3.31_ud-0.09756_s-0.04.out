@@ -1,0 +1,56 @@
+
+
+********************************************************************
+Performing GEVP analysis with :
+Manifest file 48_32_3.31_ud-0.09756_s-0.04.list
+
+********************************************************************
+Performing Local pion operator analysis :
+reading samples... done
+resampling... done
+computing effective mass... done
+fitting plateau... 
+done
+Pion analysis : 
+E_COM = 0.120891 (0.205152 GeV) +- 0.00282164 (0.00478833 GeV)
+********************************************************************
+
+
+
+********************************************************************
+Performing Local rho operator analysis :
+reading samples... done
+resampling... done
+computing effective mass... done
+fitting plateau... 
+done
+Rho analysis : 
+E_COM = 0.527089 (0.894471 GeV) +- 0.0152074 (0.025807 GeV)
+********************************************************************
+
+
+
+********************************************************************
+Performing rho-pipi GEVP analysis :
+reading samples... done
+resampling... done
+computing gev effective masses... done
+fitting plateaus... 
+done
+GEVP analysis : 
+E0_COM = 0.443666 (0.752901 GeV) +- 0.0080317 (0.0136298 GeV)
+E1_COM = 0.519466 (0.881534 GeV) +- 0.0225092 (0.0381981 GeV)
+********************************************************************
+
+
+
+********************************************************************
+Performing Luscher analysis :
+Coupling parameters : 
+g2 = 30.8954  +- 54.6795
+Mrho2 = 0.271281  +- 0.0989071
+
+g = 5.06244 +- 2.2956
+Mrho = 0.516282 (0.876131 GeV) +- 0.00473556 (0.11678 GeV)
+********************************************************************
+

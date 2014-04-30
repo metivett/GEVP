@@ -1,0 +1,26 @@
+{
+	"folders":
+	[
+		{
+			"path": "/home/thibaut/workspace/RhoPiPi/Programs/GEVP"
+		}
+	],
+	"settings":
+	{
+		"sublimeclang_additional_language_options":
+		{
+			"c++":
+			[
+				"-std=c++11"
+			]
+		},
+		"sublimeclang_options":
+		[
+			"-I${folder:${project_path:gevp.sublime-project}}",
+			"-I${folder:${project_path:gevp.sublime-project}}/include/",
+			"-I/home/thibaut/workspace/LQCDAnalysis/include",
+			"-I/home/thibaut/workspace/LQCDAnalysis/",
+			"-I/home/thibaut/workspace/LQCDAnalysis/utils/include"
+		]
+	}
+}

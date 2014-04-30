@@ -1,0 +1,227 @@
+/*
+ * LocalLuscherFit.cpp
+ *
+ *  Created on: Jun 14, 2013
+ *      Author: Thibaut Metivet
+ */
+
+#include "LocalLuscherFit.hpp"
+#include "model_luscher.hpp"
+#include "model_modified_luscher.hpp"
+#include <boost/regex.hpp>
+#include <functional>
+#include <map>
+
+using namespace LQCDA;
+using namespace LocalLuscher;
+
+std::vector<double> readResampledVector(const std::string& file)
+{
+    AsciiFileReader reader(file);
+    reader.skipLine();
+
+    std::vector<double> result;
+    readVector(reader, result);
+    return result;
+}
+
+void readSampleLuscher(std::vector<std::vector<std::vector<double>>>& rsdata, std::vector<std::vector<std::vector<double>>>& rsx, const std::string& sample)
+{
+    static std::map<double, double> BetaToAinv = {{3.31,1.697}, {3.5,2.131}, {3.61, 2.561}, {3.7, 3.026}, {3.8, 3.662}};
+    
+    // Read aMpi2 bootstrap
+    std::vector<double> aMpi2 = readResampledVector(sample+"/Msq_pi_range0_pureqcd.boot");
+	
+    // Read aE bootstrap
+    std::vector<double> aE = readResampledVector(sample+"/M_rho_range0_pureqcd.boot");
+	
+    // Get L/a
+    std::vector<double> L_a(aE.size());
+    boost::smatch sm;
+    boost::regex_match(sample, sm, boost::regex("(\\d+)_(\\d+)_(\\d+\\.\\d*)(.*)"));
+    std::istringstream Lstr(sm[2]);
+    int Ltemp;
+    Lstr >> Ltemp;
+    L_a.assign(aE.size(),Ltemp);
+
+    // Get beta
+    double beta;
+    std::istringstream betastr(sm[3]);
+    betastr >> beta;
+    // Get ainv
+    double ainv = BetaToAinv[beta];
+
+    // Get Mpi2
+    std::vector<double> Mpi2 = aMpi2 * ainv;
+    // Get E
+    std::vector<double> E = aE * ainv;
+    // Get L
+    std::vector<double> L = L_a / ainv;
+
+    // Create x vector
+    std::vector<std::vector<double> > x;
+    x.push_back(L);
+    x.push_back(Mpi2);
+    x.push_back(E);
+
+    // Create y vector
+    std::vector<std::vector<double> > y;
+    y.push_back(std::vector<double>(E.size(),0));
+
+    // Add point to data & x
+    rsdata.push_back(y);
+    rsx.push_back(x);
+}
+
+void TestQ2Range(RSDataWrapper& data) {
+    data.EnableAllPoints();
+    for(int i = 0; i < data.nData(); ++i) {
+	std::vector<double> x(data.x(i));
+	double L = x[0];
+	double Mpi2 = x[1];
+	double E = x[2];
+	double E2 = E * E;
+	double k2 = E2/(double)4 - Mpi2;
+	double q2 = 0.25 * k2 * L * L / (M_PI * M_PI);
+	if(q2 < 0. || q2 > 0.6)
+	    data.DisablePoint(i);
+    }
+}
+
+void FitLuscher()
+{
+    using namespace std::placeholders;
+    
+    std::vector<std::vector<std::vector<double>>> rsdata, rsx;
+	
+    ManifestFileReader manifest("man_all");    
+    manifest.ForEach(std::bind(readSampleLuscher, rsdata, rsx, _1));
+
+    RSFitData * fdata = new RSFitData(rsdata, rsx);
+    LuscherModel* fmodel = new LuscherModel();
+    
+    std::cout<<"\nResampled Fit defined!\n"
+	     <<"Fitting...\n";
+
+    std::ofstream ofs("Fit_Luscher_results.fit");
+    std::vector<std::vector<double> > FittedParams(3);
+    std::vector<std::vector<double> > FittedErrors(3);
+
+    unsigned int NFittedSamples = 0;
+    for(int s = 0; s < fdata->NSamples(); ++s) {
+	RSDataWrapper data = fdata->Value(s);
+	TestQ2Range(data);
+	auto SampleFitResult = Fitter<Chi2Base, Mn2MigradMinimizer>::Fit(&data, fmodel);
+	LQCDOut<< "Sample " << s << '\n'
+	       <<SampleFitResult<<'\n';
+	ofs << "Sample " << s << " : " << '\n'
+	    << SampleFitResult << '\n';
+
+	if(fabs(SampleFitResult.FittedParameters().Error(2)) < 1.) {
+	    FittedParams[0].push_back(fabs(SampleFitResult.FittedParameters().Value(0)));
+	    FittedParams[1].push_back(fabs(SampleFitResult.FittedParameters().Value(1)));
+	    FittedParams[2].push_back(fabs(SampleFitResult.FittedParameters().Value(2)));
+
+	    FittedErrors[0].push_back(SampleFitResult.FittedParameters().Error(0));
+	    FittedErrors[1].push_back(SampleFitResult.FittedParameters().Error(1));
+	    FittedErrors[2].push_back(SampleFitResult.FittedParameters().Error(2));
+	    ++NFittedSamples;
+	}
+    }
+    std::vector<double> FittedParamsResult(3);
+    FittedParamsResult[0] = LQCDA::mean(FittedParams[0]);
+    FittedParamsResult[1] = LQCDA::mean(FittedParams[1]);
+    FittedParamsResult[2] = LQCDA::mean(FittedParams[2]);
+    std::vector<double> FittedParamsErrorMn(3);
+    FittedParamsErrorMn[0] = LQCDA::mean(FittedErrors[0]);
+    FittedParamsErrorMn[1] = LQCDA::mean(FittedErrors[1]);
+    FittedParamsErrorMn[2] = LQCDA::mean(FittedErrors[2]);
+    std::vector<double> FittedParamsErrorBs(3);
+    FittedParamsErrorBs[0] = LQCDA::SampleVariance(FittedParams[0]);
+    FittedParamsErrorBs[1] = LQCDA::SampleVariance(FittedParams[1]);
+    FittedParamsErrorBs[2] = LQCDA::SampleVariance(FittedParams[2]);
+    LQCDOut << '\n' << NFittedSamples << " samples fitted.\n";
+    LQCDOut << "\nResults : \n" << FittedParamsResult;
+    LQCDOut << "\nErrors (Minuit) : \n" << FittedParamsErrorMn;
+    LQCDOut << "\nErrors (bootstrap) : \n" << FittedParamsErrorBs;
+    
+}
+
+void readSampleModifiedLuscher(std::vector<std::vector<std::vector<double>>>& rsdata, std::vector<std::vector<std::vector<double>>>& rsx, const std::string& sample)
+{
+    static std::map<double, double> BetaToAinv = {{3.31,1.697}, {3.5,2.131}, {3.61, 2.561}, {3.7, 3.026}, {3.8, 3.662}};
+    
+    // Read aMpi2 bootstrap
+    std::vector<double> aMpi2 = readResampledVector(sample+"/Msq_pi_range0_pureqcd.boot");
+	
+    // Read aE bootstrap
+    std::vector<double> aE = readResampledVector(sample+"/M_rho_range0_pureqcd.boot");
+	
+    // Get L/a
+    std::vector<double> L_a(aE.size());
+    boost::smatch sm;
+    boost::regex_match(sample, sm, boost::regex("(\\d+)_(\\d+)_(\\d+\\.\\d*)(.*)"));
+    std::istringstream Lstr(sm[2]);
+    int Ltemp;
+    Lstr >> Ltemp;
+    L_a.assign(aE.size(),Ltemp);
+
+    // Get beta
+    double beta;
+    std::istringstream betastr(sm[3]);
+    betastr >> beta;
+    // Get ainv
+    double ainv = BetaToAinv[beta];
+
+    // Get Mpi2
+    std::vector<double> Mpi2 = aMpi2 * ainv;
+    // Get E
+    std::vector<double> E = aE * ainv;
+    // Get L
+    std::vector<double> L = L_a / ainv;
+
+    // Create x vector
+    std::vector<std::vector<double> > x;
+    x.push_back(L);
+    x.push_back(Mpi2);
+
+    // Create y vector
+    std::vector<std::vector<double> > y;
+    y.push_back(E);
+
+    // Add point to data
+    rsdata.push_back(y);
+    rsx.push_back(x);
+}
+
+void FitLuscherModified()
+{
+    using namespace std::placeholders;
+    // Data
+    std::vector<std::vector<std::vector<double>>> rsdata, rsx;
+    
+    ManifestFileReader manifest("man_all");
+    manifest.ForEach(std::bind(readSampleModifiedLuscher, rsdata, rsx, _1));
+
+    RSFitData * fdata = new RSFitData(rsdata, rsx);
+    
+    // Model
+    ModifiedLuscherModel* fmodel = new ModifiedLuscherModel();
+
+    // Initial parameters
+    std::vector<double> initPar(3);
+    initPar[0] = 1.8;		// a
+    initPar[1] = 0.780;		// b
+    initPar[2] = 5.;		// g
+    
+    // Fit
+    //ResampledFit<Chi2Base, BootstrapResampler>* myFit = new ResampledFit<Chi2Base, BootstrapResampler>(fdata, fmodel, initPar);
+    std::cout<<"\nResampled Fit defined!\n"
+	     <<"Fitting...\n";
+    for(int s = 0; s < 3; ++s) {
+	RSDataWrapper data = fdata->Value(s);
+	LQCDOut << Fitter<Chi2Base, Mn2SimplexMinimizer>::Fit(&data, fmodel, initPar);
+    }
+    //myFit->PrintParameters();
+    //printDistances(myFit->GetPointToModelDistances());
+}
