@@ -89,6 +89,77 @@
     }
     else
 	delta = -8.*M_PI*M_SQRTPI/(L*L*L)*q2/E_COM*Z001::z001q2(q2);
-    std::cout << "q2 = " << q2 << std::endl;
+    // std::cout << "q2 = " << q2 << std::endl;
     return delta;
+ }
+
+ // Luscher's cotg(delta)
+ double cotd_COM(double W, double MPi, double L)
+ {
+    double E_COM = W;
+    double q2 = (E_COM*E_COM/4. - MPi*MPi)*(L*L)/(4.*M_PI*M_PI);
+    double cotd;
+    if(q2 < 0.) {
+        cotd = 0.;
+        std::cout << "q2 < 0 !" << std::endl;
+    }
+    else
+        cotd = Z001::z001q2(q2) / (M_PI*M_SQRTPI*sqrt(q2));
+    // std::cout << "q2 = " << q2 << std::endl;
+    return cotd;
+ }
+
+ Sample<Matrix<double>> fitSin2d(const Matrix<double>& gevp_plat, const Sample<Matrix<double>>& rs_sin2d, const Sample<double>& rs_pi_plat)
+ {
+    // std::cout << rs_sin2d[0].rows() << std::endl << rs_sin2d[0](4, 0);
+    int nboot = rs_sin2d.size();
+    int npts = gevp_plat.size();
+
+    Sample<Matrix<double>> result(nboot, 1, 2);
+
+    XYDataSample<double> * sin2d_vs_E_mpi = new XYDataSample<double>(npts, 2, 1, nboot);
+
+    for(int n = 0; n < nboot; ++n) {
+        sin2d_vs_E_mpi->x({}, 0)[n] << gevp_plat.transpose();
+        sin2d_vs_E_mpi->x({}, 1)[n] << Matrix<double>::Constant(npts, 1, rs_pi_plat[n]);
+        sin2d_vs_E_mpi->y({}, 0)[n] << rs_sin2d[n];
+    }
+    // sin2d_vs_E_mpi->setCovFromSample();
+    Matrix<double> yycov(npts, npts);
+    auto sin2dvar = rs_sin2d.variance();
+    FOR_MAT_DIAG(yycov, i)
+    {
+        yycov(i, i) = 1. / sin2dvar(i, 0);
+    }
+    sin2d_vs_E_mpi->yyCov(0, 0) = yycov;
+    
+    Models::Sin2d_vs_E_mpi * model = new Models::Sin2d_vs_E_mpi();
+
+    Chi2Fit<double, MIN::MIGRAD> Fit;
+    Fit.options.verbosity = SILENT;
+
+    double chi2_dof = 0.;
+
+    std::vector<double> g2_mrho2_init = {20., 0.25};
+    for(int n = 0; n < nboot; ++n) {
+        // // Fit g and Mrho
+        Fit.setData(sin2d_vs_E_mpi->getData(n));    
+        Fit.fitPointRange(0, 3, true);
+
+        auto fit = Fit.fit(*model, g2_mrho2_init);
+        chi2_dof += fit.cost() / fit.nDOF();
+
+        // // Store results
+        double g2 = fabs(fit.parameters()[0]);
+        double Mrho2 = fabs(fit.parameters()[1]);
+        result[n](0, 0) = g2;
+        result[n](0, 1) = Mrho2;
+    }
+    chi2_dof /= nboot;
+    std::cout << "chi2/dof = " << chi2_dof << std::endl;
+
+    delete sin2d_vs_E_mpi;
+    delete model;
+
+    return result;
  }

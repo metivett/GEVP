@@ -10,6 +10,8 @@
 
  #include <string>
  #include <ostream>
+ #include <vector>
+
 
  enum analysis_frame
  {

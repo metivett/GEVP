@@ -14,6 +14,126 @@
  using namespace std;
  using namespace LQCDA;
 
+ class CoshMeffHelper
+ : public ScalarFunction<double>
+ {
+ private:
+ 	double _t1, _t2, _C;
+
+ public:
+ 	CoshMeffHelper(double t1, double t2, double C)
+ 	: ScalarFunction<double>(1)
+ 	, _t1(t1)
+ 	, _t2(t2)
+ 	, _C(C)
+ 	{}
+
+ 	virtual double operator()(const double* meff) const override
+ 	{
+ 		// cout << "t1 = " << _t1 << endl;
+ 		// cout << "t2 = " << _t2 << endl;
+ 		// cout << "C = " << _C << endl;
+ 		// cout << "meff = " << *meff << endl;
+ 		// cout << _C - cosh(*meff*_t1)/cosh(*meff*_t2) << endl;
+ 		return _C - cosh(*meff*_t1)/cosh(*meff*_t2);
+ 	}
+
+ };
+
+ Sample<Matrix<double>> localMeff(
+ 	MeffType type,
+ 	const Sample<Matrix<double>>& rs_corr, int Nt)
+ {
+ 	int nboot = rs_corr.size();
+ 	Sample<Matrix<double>> rs_meff(nboot);
+
+ 	if(type == MeffType::COSH)
+ 	{
+	 	Roots::BrentRootFinder<double> solver;
+
+	 	rs_meff.resizeMatrix(Nt/2, 1);
+	 	for(int s = 0; s < nboot; ++s) {
+	 		for(int i = 0; i < Nt/2; ++i) {
+	 			double tmp = fabs(rs_corr[s](i, 0) / rs_corr[s](i+1, 0));
+	 			if(tmp > 1.01)
+	 			{
+		 			rs_meff[s](i) = solver.solve(CoshMeffHelper(
+		 				i - Nt/2.,
+		 				i + 1 - Nt/2.,
+		 				tmp
+		 				), 0, 10).value();
+		 		}
+		 		else
+		 		{
+		 			rs_meff[s](i) = log(tmp);
+		 		}
+	 		}
+	 	}
+	}
+ 	else if(type == MeffType::LOG)
+ 	{
+	 	rs_meff.resizeMatrix(Nt/2, 1);
+	 	for(int s = 0; s < nboot; ++s) {
+	 		for(int i = 0; i < Nt/2; ++i) {
+	 			rs_meff[s](i) = (std::log(fabs(rs_corr[s](i, 0) / rs_corr[s](i+1, 0))));
+	 		}
+	 	}
+	}
+
+ 	return rs_meff;
+ }
+
+ Sample<Matrix<double>> gevpMeff(
+ 	MeffType type,
+ 	const Sample<Matrix<complex<double>>>& rs_gev, int Nt, int t0)
+ {
+ 	int nboot = rs_gev.size();
+ 	int ngev = rs_gev[0].cols();
+ 	Sample<Matrix<double>> rs_meff(nboot);
+
+ 	if(type == MeffType::COSH)
+ 	{
+	 	Roots::BrentRootFinder<double> solver;
+
+	 	rs_meff.resizeMatrix(Nt/2, ngev);
+	 	for(int s = 0; s < nboot; ++s) {
+	 		for(int i = 0; i < Nt/2; ++i) {
+	 			for(int j = 0; j < ngev; ++j)
+	 			{
+	 				double tmp = fabs(real(rs_gev[s](i, j)));
+	 				if(tmp > 1.01)
+	 				{
+			 			rs_meff[s](i, j) = solver.solve(CoshMeffHelper(
+			 				i - Nt/2.,
+			 				t0 - Nt/2.,
+			 				tmp
+			 				), 0., 10.).value();
+			 		}
+			 		else
+			 		{
+			 			rs_meff[s](i, j) = log(tmp / fabs(real(rs_gev[s](i + 1, j))));
+			 		}
+	 			}
+	 		}
+	 	}
+	}
+ 	else if(type == MeffType::LOG)
+ 	{
+	 	rs_meff.resizeMatrix(Nt/2, ngev);
+	 	for(int s = 0; s < nboot; ++s) {
+	        for(int i = 0; i < Nt/2; ++i) {
+	            for(int j = 0; j < ngev; ++j)
+	            {
+	                rs_meff[s](i, j) = std::log(fabs(real(rs_gev[s](i, j)))) / (t0 - i);
+	                // rs_meff[s](i, j) = log(fabs(real(rs_gev[s](i, j)) / real(rs_gev[s](i + 1, j))));
+	            }
+	        }
+	    }
+	}
+
+ 	return rs_meff;
+ }
+
  // compute p-value of linear model parameter using t-statistics
  // p is the parameter value
  // p0 the null hypothesis value
@@ -97,7 +217,7 @@
  		cout << "x_var = " << x_var << endl;
  		cout << "p_val = " << p1_p_val << endl;
 
- 		if(p1_p_val > p_val_threshold);
+ 		if(p1_p_val > p_val_threshold)
  			best_len = len;
  	}
 
@@ -169,6 +289,83 @@
 		// // Store results
  		double E = fabs(fit.parameters()[0]);
  		result[n] = E;
+ 	}
+ 	chi2_dof /= nboot;
+ 	cout << "chi2/dof = " << chi2_dof << endl;
+
+ 	delete meff_t;
+ 	delete model;
+
+ 	return result;
+ }
+
+ Sample<double> fitPlateau(
+ 	const LQCDA::Sample<LQCDA::Matrix<double>>& rs_meff,
+ 	const fit_range& f_range,
+ 	Vector<bool>& is_valid)
+ {
+ 	int nboot = rs_meff.size();
+ 	int npts = rs_meff[0].size();
+
+ 	Sample<double> result(nboot);
+
+ 	Vector<double> tvec(npts);
+ 	for(int t = 0; t < npts; ++t)
+ 	{
+ 		tvec(t) = t;
+ 	}
+
+ 	// fill XYDataSample
+ 	XYDataSample<double> * meff_t = new XYDataSample<double>(npts, 1, 1, nboot);
+ 	for(int n = 0; n < nboot; ++n) {
+ 		meff_t->x({}, 0)[n] << tvec;
+ 		meff_t->y({}, 0)[n] << rs_meff[n];
+ 	}
+ 	meff_t->setCovFromSample();
+
+ 	// search plateau
+ 	plat_range range;
+ 	if(f_range.tmin <= 0 && f_range.tmax <= 0)
+ 	{
+	 	cout << "searching plateau...\n";
+	 	XYData<double> * meff_t_mean = new XYData<double>(npts, 1, 1);
+	 	meff_t_mean->x({}, 0) << tvec;
+	 	meff_t_mean->y({}, 0) << rs_meff.mean();
+	 	meff_t_mean->yyCov(0, 0) = meff_t->yyCov(0, 0);
+	 	range = findPlateau(*meff_t_mean);
+	 	cout << "plateau found in range (" << range.start << ", "
+	 		<< range.start + range.len - 1 << ")\n";
+	}
+	else
+	{
+		range = {f_range.tmin, f_range.tmax - f_range.tmin + 1};
+		cout << "using plateau range (" << range.start << ", "
+	 		<< range.start + range.len - 1 << ")\n";
+	}
+	
+
+	Models::Constant * model = new Models::Constant();
+
+ 	Chi2Fit<double, MIN::MIGRAD> Fit;
+ 	Fit.options.verbosity = SILENT;
+
+ 	double chi2_dof = 0.;
+
+ 	vector<double> E0 = {0.};
+ 	for(int n = 0; n < nboot; ++n) {
+		// // Fit E
+		Fit.setData(meff_t->getData(n));	
+		Fit.fitPointRange(range.start, range.start + range.len - 1);
+
+		auto fit = Fit.fit(*model, E0);
+		chi2_dof += fit.cost() / fit.nDOF();
+
+		// // Store results
+ 		double E = fabs(fit.parameters()[0]);
+ 		double E_fit_err = fabs(fit.errors()[0]);
+ 		result[n] = E;
+ 		is_valid[n] = (E_fit_err/E < 0.5);
+
  	}
  	chi2_dof /= nboot;
  	cout << "chi2/dof = " << chi2_dof << endl;

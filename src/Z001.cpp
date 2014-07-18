@@ -55,23 +55,23 @@ int init_n2degen(unsigned int nsq) {
         if (is_integer(rtnsq)) sum=6;
         else sum=0;
         for(n1=1;n1<=nsqmax;n1++)
-	{
+        {
             rtdum=sqrt(nsq-n1*n1);
             if(is_integer(rtdum) && rtdum !=0.) sum+=12;
-	}
+        }
         for(n1=1;n1<=nsqmaxovrt2;n1++)
-	{
+        {
             rtdum=sqrt(nsq-2.0*n1*n1);
             if(is_integer(rtdum) && rtdum !=0.) sum+=8;
-	}
+        }
         for(n1=1;n1<=nsqmax;n1++)
-	{
+        {
             for(n2=1;n2<=min(n1-1.0,floor(sqrt(nsq-n1*n1)));n2++)
-	    {
+            {
                 rtdum=sqrt(nsq-n1*n1-n2*n2);
                 if(is_integer(rtdum) && rtdum !=0.) sum+=16;
-	    }
-	}
+            }
+        }
     }
     return sum;
 }

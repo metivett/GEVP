@@ -18,9 +18,9 @@
 		[
 			"-I${folder:${project_path:gevp.sublime-project}}",
 			"-I${folder:${project_path:gevp.sublime-project}}/include/",
-			"-I/home/thibaut/workspace/LQCDAnalysis/include",
+			"-I/home/thibaut/workspace/LQCDAnalysis/include/",
 			"-I/home/thibaut/workspace/LQCDAnalysis/",
-			"-I/home/thibaut/workspace/LQCDAnalysis/utils/include"
+			"-I/home/thibaut/workspace/LQCDAnalysis/utils/include/"
 		]
 	}
 }

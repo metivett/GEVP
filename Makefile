@@ -1,6 +1,6 @@
 CC = g++
 
-CFLAGS = -O2 -std=c++11
+CFLAGS = -O2 -std=c++11 -g
 LDFLAGS = -fopenmp
 
 INCLUDES = -I./include
@@ -14,6 +14,7 @@ LIBS += -L"/home/thibaut/workspace/LQCDAnalysis/utils" -lutils
 LIBS += -lMinuit2
 LIBS += -lboost_program_options
 LIBS += -lgsl -lgslcblas
+LIBS += -lgrace_np
 
 SRC_DIR = ./src
 OBJ_FILES = Z001.o gevp.o plateau.o utils.o analyze.o main.o

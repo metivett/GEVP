@@ -44,10 +44,29 @@
 
  }
 
+ enum class MeffType
+ {
+ 	LOG,
+ 	COSH
+ };
+ // local effective mass
+ LQCDA::Sample<LQCDA::Matrix<double>> localMeff(
+ 	MeffType type,
+ 	const LQCDA::Sample<LQCDA::Matrix<double>>& rs_corr, int Nt);
+ //gevp effective mass
+ LQCDA::Sample<LQCDA::Matrix<double>> gevpMeff(
+ 	MeffType type,
+ 	const LQCDA::Sample<LQCDA::Matrix<std::complex<double>>>& rs_gev, int Nt, int t0);
+
  // fit plateau
  LQCDA::Sample<double> fitPlateau(
  	const LQCDA::Sample<LQCDA::Matrix<double>>& rs_meff,
  	const fit_range& range = fit_range());
+
+ LQCDA::Sample<double> fitPlateau(
+ 	const LQCDA::Sample<LQCDA::Matrix<double>>& rs_meff,
+ 	const fit_range& f_range,
+ 	LQCDA::Vector<bool>& is_valid);
 
 
 #endif // PLATEAU_HPP
