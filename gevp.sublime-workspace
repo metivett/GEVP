@@ -183,7 +183,7 @@
 			"file": "src/analyze.cpp",
 			"settings":
 			{
-				"buffer_size": 12162,
+				"buffer_size": 16885,
 				"line_ending": "Unix",
 				"name": "/*"
 			}
@@ -192,7 +192,7 @@
 			"file": "gevp.sublime-project",
 			"settings":
 			{
-				"buffer_size": 511,
+				"buffer_size": 513,
 				"line_ending": "Unix"
 			}
 		},
@@ -200,7 +200,7 @@
 			"file": "Makefile",
 			"settings":
 			{
-				"buffer_size": 1373,
+				"buffer_size": 1376,
 				"line_ending": "Unix"
 			}
 		},
@@ -216,7 +216,7 @@
 			"file": "include/plateau.hpp",
 			"settings":
 			{
-				"buffer_size": 1280,
+				"buffer_size": 1439,
 				"line_ending": "Unix",
 				"name": "/*"
 			}
@@ -225,15 +225,24 @@
 			"file": "include/analyze.hpp",
 			"settings":
 			{
-				"buffer_size": 786,
+				"buffer_size": 805,
 				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "include/gevp.hpp",
+			"settings":
+			{
+				"buffer_size": 1265,
+				"line_ending": "Unix",
+				"name": "/*"
 			}
 		},
 		{
 			"file": "src/mass.cpp",
 			"settings":
 			{
-				"buffer_size": 19842,
+				"buffer_size": 0,
 				"line_ending": "Unix"
 			}
 		},
@@ -250,7 +259,7 @@
 			"file": "src/plateau.cpp",
 			"settings":
 			{
-				"buffer_size": 7177,
+				"buffer_size": 9116,
 				"line_ending": "Unix",
 				"name": "/*"
 			}
@@ -265,19 +274,10 @@
 			}
 		},
 		{
-			"file": "include/gevp.hpp",
-			"settings":
-			{
-				"buffer_size": 412,
-				"line_ending": "Unix",
-				"name": "/*"
-			}
-		},
-		{
 			"file": "src/gevp.cpp",
 			"settings":
 			{
-				"buffer_size": 2316,
+				"buffer_size": 4467,
 				"line_ending": "Unix",
 				"name": "/*"
 			}
@@ -344,6 +344,7 @@
 	},
 	"file_history":
 	[
+		"/home/thibaut/workspace/LQCDAnalysis/include/Fit.hpp",
 		"/home/thibaut/workspace/RhoPiPi/Programs/GEVP/src/GEVP.cpp",
 		"/home/thibaut/workspace/RhoPiPi/Programs/GEVP/include/io.hpp",
 		"/home/thibaut/workspace/RhoPiPi/Programs/GEVP/src/io.cpp",
@@ -411,6 +412,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"fitPlateau",
 			"SILENT",
 			"cout",
 			"rho",
@@ -442,7 +444,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 4,
 			"sheets":
 			[
 				{
@@ -450,15 +452,15 @@
 					"file": "src/analyze.cpp",
 					"settings":
 					{
-						"buffer_size": 12162,
+						"buffer_size": 16885,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3059,
-								3059
+								3597,
+								3597
 							]
 						],
 						"settings":
@@ -487,6 +489,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -513,7 +519,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2642.0,
+						"translation.y": 932.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -523,15 +529,15 @@
 					"file": "gevp.sublime-project",
 					"settings":
 					{
-						"buffer_size": 511,
+						"buffer_size": 513,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								100,
-								100
+								0,
+								0
 							]
 						],
 						"settings":
@@ -559,6 +565,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -594,15 +604,15 @@
 					"file": "Makefile",
 					"settings":
 					{
-						"buffer_size": 1373,
+						"buffer_size": 1376,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								508,
-								508
+								0,
+								0
 							]
 						],
 						"settings":
@@ -630,6 +640,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -654,7 +668,7 @@
 							"syntax": "Packages/Makefile/Makefile.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 306.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -734,15 +748,15 @@
 					"file": "include/plateau.hpp",
 					"settings":
 					{
-						"buffer_size": 1280,
+						"buffer_size": 1439,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1023,
-								1023
+								1402,
+								1402
 							]
 						],
 						"settings":
@@ -771,6 +785,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -795,7 +813,7 @@
 							"syntax": "Packages/C++/C++.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 510.0,
+						"translation.y": 816.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -805,15 +823,15 @@
 					"file": "include/analyze.hpp",
 					"settings":
 					{
-						"buffer_size": 786,
+						"buffer_size": 805,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								167,
-								167
+								0,
+								0
 							]
 						],
 						"settings":
@@ -841,6 +859,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -869,27 +891,102 @@
 						"zoom_level": 1.0
 					},
 					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 2,
-			"sheets":
-			[
+				},
 				{
 					"buffer": 6,
-					"file": "src/mass.cpp",
+					"file": "include/gevp.hpp",
 					"settings":
 					{
-						"buffer_size": 19842,
+						"buffer_size": 1265,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								14810,
-								14810
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"auto_name": "/*",
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"syntax": "Packages/C++/C++.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 255.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 7,
+					"file": "src/mass.cpp",
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
 							]
 						],
 						"settings":
@@ -949,7 +1046,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 8,
 					"file": "include/utils.hpp",
 					"settings":
 					{
@@ -990,6 +1087,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -1014,25 +1115,25 @@
 							"syntax": "Packages/C++/C++.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 153.0,
+						"translation.y": 204.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 9,
 					"file": "src/plateau.cpp",
 					"settings":
 					{
-						"buffer_size": 7177,
+						"buffer_size": 9116,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1637,
-								1637
+								8966,
+								8966
 							]
 						],
 						"settings":
@@ -1061,6 +1162,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -1082,16 +1187,17 @@
 								"bh_single_quote_open",
 								"bh_single_quote_close"
 							],
-							"syntax": "Packages/C++/C++.tmLanguage"
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 921.0,
+						"translation.y": 6015.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 10,
 					"file": "src/utils.cpp",
 					"settings":
 					{
@@ -1102,8 +1208,8 @@
 						"selection":
 						[
 							[
-								302,
-								302
+								898,
+								898
 							]
 						],
 						"settings":
@@ -1132,6 +1238,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -1156,78 +1266,7 @@
 							"syntax": "Packages/C++/C++.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 867.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "include/gevp.hpp",
-					"settings":
-					{
-						"buffer_size": 412,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								341,
-								341
-							]
-						],
-						"settings":
-						{
-							"BracketHighlighterBusy": false,
-							"auto_name": "/*",
-							"bh_regions":
-							[
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close"
-							],
-							"syntax": "Packages/C++/C++.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 408.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1237,15 +1276,15 @@
 					"file": "src/gevp.cpp",
 					"settings":
 					{
-						"buffer_size": 2316,
+						"buffer_size": 4467,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2118,
-								2118
+								3814,
+								3814
 							]
 						],
 						"settings":
@@ -1274,6 +1313,10 @@
 								"bh_curly_center",
 								"bh_curly_open",
 								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
@@ -1295,10 +1338,12 @@
 								"bh_single_quote_open",
 								"bh_single_quote_close"
 							],
-							"syntax": "Packages/C++/C++.tmLanguage"
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1224.0,
+						"translation.y": 2244.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

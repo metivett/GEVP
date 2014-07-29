@@ -13,45 +13,57 @@ LIBS = -L"/home/thibaut/workspace/LQCDAnalysis/" -lLQCDAnalysis
 LIBS += -L"/home/thibaut/workspace/LQCDAnalysis/utils" -lutils
 LIBS += -lMinuit2
 LIBS += -lboost_program_options
+LIBS += -lboost_system
+LIBS += -lboost_filesystem
 LIBS += -lgsl -lgslcblas
 LIBS += -lgrace_np
 
 SRC_DIR = ./src
-OBJ_FILES = Z001.o gevp.o plateau.o utils.o analyze.o main.o
+COMMON_OBJ_FILES = plateau.o utils.o
+GEVP_OBJ_FILES = Z001.o gevp.o analyze.o gevp_main.o
+SET_SCALE_OBJ_FILES = set_scale.o set_scale_main.o
 
-EXE_NAME = gevp
+.PHONY: all clean
 
-all : $(EXE_NAME)
+all: gevp set_scale
 
-clean :
-	rm $(EXE_NAME) $(OBJ_FILES)
+clean:
+	rm -f gevp set_scale
+	rm -f $(COMMON_OBJ_FILES)
+	rm -f $(GEVP_OBJ_FILES)
+	rm -f $(SET_SCALE_OBJ_FILES)
 
-$(EXE_NAME): $(OBJ_FILES)
+gevp: $(COMMON_OBJ_FILES) $(GEVP_OBJ_FILES)
 	@echo 'Building target $@'
 	@echo 'Invoking GCC C++ Linker'
-	$(CC) $(LDFLAGS) -o $(EXE_NAME) $(OBJ_FILES) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(COMMON_OBJ_FILES) $(GEVP_OBJ_FILES) $(LIBS)
 	@echo 'Finished building target $@'
 	@echo ' '
 
-%.o: $(SRC_DIR)/%.cpp
+set_scale: $(COMMON_OBJ_FILES) $(SET_SCALE_OBJ_FILES)
+	@echo 'Building target $@'
+	@echo 'Invoking GCC C++ Linker'
+	$(CC) $(LDFLAGS) -o $@ $(COMMON_OBJ_FILES) $(SET_SCALE_OBJ_FILES) $(LIBS)
+	@echo 'Finished building target $@'
+	@echo ' '
+
+$(COMMON_OBJ_FILES): %.o: $(SRC_DIR)/common/%.cpp
 	@echo 'Building file $<'
 	@echo 'Invoking GCC C++ Compiler'
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.o: $(SRC_DIR)/%.cc
+$(GEVP_OBJ_FILES): %.o: $(SRC_DIR)/gevp/%.cpp
 	@echo 'Building file $<'
 	@echo 'Invoking GCC C++ Compiler'
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.o: $(SRC_DIR)/%.c
+$(SET_SCALE_OBJ_FILES): %.o: $(SRC_DIR)/set_scale/%.cpp
 	@echo 'Building file $<'
 	@echo 'Invoking GCC C++ Compiler'
-	gcc $(CFLAGS) $(INCLUDES) -o $@ -c $<
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
-
-.PHONY: clean $(EXE_NAME)

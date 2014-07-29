@@ -13,6 +13,11 @@
 
  #include "LQCDA.hpp"
 
+ struct fit_range
+ {
+ 	int tmin{0}, tmax{0};
+ };
+
  // convert lattice units to physical units multiplying by a^-1
  double GeV(double x, double beta);
 

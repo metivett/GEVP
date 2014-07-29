@@ -12,16 +12,13 @@
  #include <ostream>
  #include <vector>
 
+ #include "utils.hpp"
+
 
  enum analysis_frame
  {
  	COM = 0,
  	MV = 1
- };
-
- struct fit_range
- {
- 	int tmin{0}, tmax{0};
  };
 
  struct analysis_parameters

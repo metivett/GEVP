@@ -47,8 +47,10 @@
  enum class MeffType
  {
  	LOG,
- 	COSH
+ 	COSH,
+    SINH
  };
+
  // local effective mass
  LQCDA::Sample<LQCDA::Matrix<double>> localMeff(
  	MeffType type,
@@ -67,6 +69,12 @@
  	const LQCDA::Sample<LQCDA::Matrix<double>>& rs_meff,
  	const fit_range& f_range,
  	LQCDA::Vector<bool>& is_valid);
+
+ // get plateau (from correlator)
+ LQCDA::Sample<double> getPlateau(
+    const LQCDA::Sample<LQCDA::Matrix<double>>& rs_corr,
+    MeffType type,
+    const fit_range& range = fit_range());
 
 
 #endif // PLATEAU_HPP
