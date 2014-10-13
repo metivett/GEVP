@@ -35,14 +35,16 @@ struct set_scale_result
 {
 	double a;
 	double a_err;
+    double a_inv;
+    double a_inv_err;
 };
 
 namespace Models {
-    class aMOmega_vs_aMpi_aMKchi
+    class aMOmega_vs_aMpi2_aMKchi2
     : public LQCDA::ParametrizedScalarFunction<double>
     {
     public:
-        aMOmega_vs_aMpi_aMKchi(double Mpi_phys, double MK_phys, double MOmega_phys)
+        aMOmega_vs_aMpi2_aMKchi2(double Mpi_phys, double MK_phys, double MOmega_phys)
         : LQCDA::ParametrizedScalarFunction<double>(2, 3)
         , m_Mpi_phys(Mpi_phys)
         , m_MKchi2_phys(MK_phys*MK_phys - Mpi_phys*Mpi_phys/2.)
@@ -56,10 +58,9 @@ namespace Models {
 
         virtual double operator()(const double* x, const double* p) const override
         {
-            return  p[0]*m_MOmega_phys 
-                    + p[1]*(x[0] - m_Mpi2_MOmega2_phys)
-                    + p[2]*(x[1] - m_MKchi2_MOmega2_phys)
-            ;
+            return  p[0]*m_MOmega_phys *
+                    (1 + p[1]*(x[0] - m_Mpi2_MOmega2_phys) + p[2]*(x[1] - m_MKchi2_MOmega2_phys))
+                    ;
         }
 
     private:

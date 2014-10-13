@@ -109,13 +109,17 @@
     return cotd;
  }
 
- Sample<Matrix<double>> fitSin2d(const Matrix<double>& gevp_plat, const Sample<Matrix<double>>& rs_sin2d, const Sample<double>& rs_pi_plat)
+ Sample<Matrix<double>> fitSin2d(
+    const Matrix<double>& gevp_plat, 
+    const Sample<Matrix<double>>& rs_sin2d, 
+    const Sample<double>& rs_pi_plat, 
+    const fit_range& range)
  {
     // std::cout << rs_sin2d[0].rows() << std::endl << rs_sin2d[0](4, 0);
     int nboot = rs_sin2d.size();
     int npts = gevp_plat.size();
 
-    Sample<Matrix<double>> result(nboot, 1, 2);
+    Sample<Matrix<double>> result(nboot, 2, 2);
 
     XYDataSample<double> * sin2d_vs_E_mpi = new XYDataSample<double>(npts, 2, 1, nboot);
 
@@ -126,34 +130,71 @@
     }
     // sin2d_vs_E_mpi->setCovFromSample();
     Matrix<double> yycov(npts, npts);
+    yycov.setZero();
     auto sin2dvar = rs_sin2d.variance();
     FOR_MAT_DIAG(yycov, i)
     {
-        yycov(i, i) = 1. / sin2dvar(i, 0);
+        yycov(i, i) = sin2dvar(i, 0);
     }
     sin2d_vs_E_mpi->yyCov(0, 0) = yycov;
-    
+    std::cout << yycov << std::endl;
+
     Models::Sin2d_vs_E_mpi * model = new Models::Sin2d_vs_E_mpi();
 
     Chi2Fit<double, MIN::MIGRAD> Fit;
     Fit.options.verbosity = SILENT;
 
     double chi2_dof = 0.;
-
-    std::vector<double> g2_mrho2_init = {20., 0.25};
+ 
+    // std::vector<double> g2_mrho2_init = {25, 0.2};
+    // std::vector<double> g2_mrho2_init = {20., 0.23};
+    std::vector<double> g2_mrho2_init = {36., 0.075};
+    // std::vector<double> g2_mrho2_init = {36., 0.275};
+    // std::vector<double> g2_mrho2_init = {60., 0.119};
     for(int n = 0; n < nboot; ++n) {
-        // // Fit g and Mrho
-        Fit.setData(sin2d_vs_E_mpi->getData(n));    
-        Fit.fitPointRange(0, 3, true);
+        // Fit g and Mrho
+        Fit.setData(sin2d_vs_E_mpi->getData(n));   
+
+        if(range.tmin <= 0 && range.tmax <= 0)
+            Fit.fitAllPoints(true);
+        else
+            Fit.fitPointRange(range.tmin, range.tmax, true);
 
         auto fit = Fit.fit(*model, g2_mrho2_init);
         chi2_dof += fit.cost() / fit.nDOF();
 
         // // Store results
-        double g2 = fabs(fit.parameters()[0]);
-        double Mrho2 = fabs(fit.parameters()[1]);
-        result[n](0, 0) = g2;
-        result[n](0, 1) = Mrho2;
+        if(fit.isValid())
+        {
+            double g2 = fabs(fit.parameters()[0]);
+            double Mrho2 = fabs(fit.parameters()[1]);
+            result[n](0, 0) = g2;
+            result[n](0, 1) = Mrho2;
+            result[n](1, 0) = fabs(fit.errors()[0]);
+            result[n](1, 1) = fabs(fit.errors()[1]);
+        }
+        else
+        {
+            // std::cout << sqrt(fabs(fit.parameters()[0])) << std::endl;
+            std::vector<double> g2_mrho2_init2 = {fabs(fit.parameters()[0]), fabs(fit.parameters()[1])};
+            auto fit2 = Fit.fit(*model, g2_mrho2_init2);
+            // std::cout << fit2.isValid() << "\t" << sqrt(fabs(fit2.parameters()[0])) << "\t" << fabs(fit2.errors()[0])/fabs(fit2.parameters()[0]) << std::endl;
+            chi2_dof += fit2.cost() / fit2.nDOF();
+            if(fit2.isValid())
+            {
+                result[n](0, 0) = fabs(fit2.parameters()[0]);
+                result[n](0, 1) = fabs(fit2.parameters()[1]);
+                result[n](1, 0) = fabs(fit2.errors()[0]);
+                result[n](1, 1) = fabs(fit2.errors()[1]);
+            }
+            else
+            {
+                result[n](0, 0) = fabs(fit2.parameters()[0]);
+                result[n](0, 1) = fabs(fit2.parameters()[1]);
+                result[n](1, 0) = fabs(fit2.parameters()[0]);
+                result[n](1, 1) = fabs(fit2.parameters()[1]);
+            }
+        }
     }
     chi2_dof /= nboot;
     std::cout << "chi2/dof = " << chi2_dof << std::endl;

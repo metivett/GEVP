@@ -34,7 +34,8 @@ set_scale_result set_scale(const std::string& manfile, const set_scale_parameter
 {
 	set_scale_result result;
 
-	string fout_name = manfile.substr(0, manfile.find_last_of('.')) + ".scale.out";
+    fs::path manfilepath(manfile);
+	string fout_name = manfilepath.filename().native() + ".scale.out";
     ofstream fout(fout_name);
     tee_device<ostream, ofstream> tee_out(cout, fout);
     stream<tee_device<ostream, ofstream>> out(tee_out);
@@ -82,7 +83,6 @@ set_scale_result set_scale(const std::string& manfile, const set_scale_parameter
             << "********************************************************************" << endl
             << "Ensemble " << ensembles[ens] << endl;
 
-        fs::path manfilepath(manfile);
         fs::path conf_list_file_path = manfilepath.parent_path()/ensembles[ens]/"man_pureqcd.GG";
         string conf_list_file = conf_list_file_path.native();
 
@@ -140,30 +140,39 @@ set_scale_result set_scale(const std::string& manfile, const set_scale_parameter
     }
 
     /*** Fit scale from Omega ***/
-    XYDataSample<double>* aMOmega_vs_aMpi_aMKchi = new XYDataSample<double>(n_ensembles, 2, 1, params.nboot);
+    XYDataSample<double>* aMOmega_vs_aMpi2_aMKchi2 = new XYDataSample<double>(n_ensembles, 2, 1, params.nboot);
 
     FOR_SAMPLE(aMOmega, s)
     {
-        aMOmega_vs_aMpi_aMKchi->x({}, 0)[s] << aMpi2_aMOmega2[s];
-        aMOmega_vs_aMpi_aMKchi->x({}, 1)[s] << aMKchi2_aMOmega2[s];
-        aMOmega_vs_aMpi_aMKchi->y({}, 0)[s] << aMOmega[s];
+        aMOmega_vs_aMpi2_aMKchi2->x({}, 0)[s] << aMpi2_aMOmega2[s];
+        aMOmega_vs_aMpi2_aMKchi2->x({}, 1)[s] << aMKchi2_aMOmega2[s];
+        aMOmega_vs_aMpi2_aMKchi2->y({}, 0)[s] << aMOmega[s];
     }
-    aMOmega_vs_aMpi_aMKchi->setCovFromSample();
+    // aMOmega_vs_aMpi2_aMKchi2->setCovFromSample();
+    Matrix<double> yycov(n_ensembles, n_ensembles);
+    yycov.setZero();
+    auto aMOmega_var = aMOmega.variance();
+    FOR_MAT_DIAG(yycov, i)
+    {
+        yycov(i, i) = aMOmega_var(i, 0);
+    }
+    aMOmega_vs_aMpi2_aMKchi2->yyCov(0, 0) = yycov;
 
-    Models::aMOmega_vs_aMpi_aMKchi * model = new Models::aMOmega_vs_aMpi_aMKchi(params.pi_mass, params.K_mass, params.Omega_mass);
+    Models::aMOmega_vs_aMpi2_aMKchi2 * model = new Models::aMOmega_vs_aMpi2_aMKchi2(params.pi_mass, params.K_mass, params.Omega_mass);
 
     Chi2Fit<double, MIN::MIGRAD> Fit;
     Fit.options.verbosity = SILENT;
 
     double chi2_dof = 0.;
-    vector<double> init_par_values = {0., 0., 0.};
+    vector<double> init_par_values = {0.5, 0., 0.};
 
     Sample<double> rs_a(params.nboot);
+    Sample<double> rs_a_inv(params.nboot);
 
     FOR_SAMPLE(aMOmega, s)
     {
-        // Fit aMOmega_vs_aMpi_aMKchi
-        Fit.setData(aMOmega_vs_aMpi_aMKchi->getData(s));
+        // Fit aMOmega_vs_aMpi2_aMKchi2
+        Fit.setData(aMOmega_vs_aMpi2_aMKchi2->getData(s));
         Fit.fitAllPoints(true);
 
         auto fit = Fit.fit(*model, init_par_values);
@@ -177,14 +186,25 @@ set_scale_result set_scale(const std::string& manfile, const set_scale_parameter
         double C = fabs(fit.parameters()[2]);
         double C_fit_err = fabs(fit.errors()[2]);
         rs_a[s] = A;
+        rs_a_inv[s] = 1./ A;
     }
     chi2_dof /= params.nboot;
 
     cout << endl << "********************************************************************" << endl;
     cout << "scale setting MOmega fit chi2/dof = " << chi2_dof << endl;
 
+    for(int n=0; n<aMOmega_vs_aMpi2_aMKchi2->nPoints(); n++)
+    {
+        cout << aMpi2_aMOmega2.mean()(n, 0) << " ";
+        cout << aMKchi2_aMOmega2.mean()(n, 0) << " ";
+        cout << aMOmega.mean()(n, 0) << " ";
+        cout << endl;
+    }
+
     result.a = rs_a.mean();
     result.a_err = sqrt(rs_a.variance());
+    result.a_inv = rs_a_inv.mean();
+    result.a_inv_err = sqrt(rs_a_inv.variance());
 
 	return result;
 }

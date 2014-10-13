@@ -74,17 +74,18 @@
  	{
 	 	Roots::BrentRootFinder<double> solver;
 
-	 	rs_meff.resizeMatrix(Nt/2, 1);
+	 	rs_meff.resizeMatrix(Nt-1, 1);
 	 	for(int s = 0; s < nboot; ++s) {
-	 		for(int i = 0; i < Nt/2; ++i) {
+	 		for(int i = 0; i < Nt-1; ++i) {
 	 			double tmp = fabs(rs_corr[s](i, 0) / rs_corr[s](i+1, 0));
-	 			if(tmp > 1.01)
+	 			// if(tmp > 1.01)
+                if((tmp > 0.05 && i+1-Nt/2. != 0) || tmp > 1.01)        
 	 			{
-		 			rs_meff[s](i) = solver.solve(CoshMeffHelper(
+		 			rs_meff[s](i) = fabs(solver.solve(CoshMeffHelper(
 		 				i - Nt/2.,
 		 				i + 1 - Nt/2.,
 		 				tmp
-		 				), 0, 10).value();
+		 				), 0, 10).value());
 		 		}
 		 		else
 		 		{
@@ -97,17 +98,25 @@
     {
         Roots::BrentRootFinder<double> solver;
 
-        rs_meff.resizeMatrix(Nt/2, 1);
+        rs_meff.resizeMatrix(Nt-1, 1);
         for(int s = 0; s < nboot; ++s) {
-            for(int i = 0; i < Nt/2-4; ++i) {
+            for(int i = 0; i < Nt-1; ++i) {
                 double tmp = fabs(rs_corr[s](i, 0) / rs_corr[s](i+1, 0));
-                if(tmp > 1.1 - 1./(i + 1 - Nt/2.))
+                if(i < Nt/2 - 1 && tmp > 1.1 - 1./(i + 1 - Nt/2.))
                 {
                     rs_meff[s](i) = solver.solve(SinhMeffHelper(
                         i - Nt/2.,
                         i + 1 - Nt/2.,
                         tmp
-                        ), 0.01, 20).value();
+                        ), 0.01, 10).value();
+                }
+                else if(i > Nt/2 && tmp > 1.1 - 1./(i + 1 - Nt/2.))
+                {
+                    rs_meff[s](i) = solver.solve(SinhMeffHelper(
+                        i - Nt/2.,
+                        i + 1 - Nt/2.,
+                        tmp
+                        ), -10, -0.01).value();
                 }
                 else
                 {
@@ -118,9 +127,9 @@
     }
  	else if(type == MeffType::LOG)
  	{
-	 	rs_meff.resizeMatrix(Nt/2, 1);
+	 	rs_meff.resizeMatrix(Nt-1, 1);
 	 	for(int s = 0; s < nboot; ++s) {
-	 		for(int i = 0; i < Nt/2; ++i) {
+	 		for(int i = 0; i < Nt-1; ++i) {
 	 			rs_meff[s](i) = (std::log(fabs(rs_corr[s](i, 0) / rs_corr[s](i+1, 0))));
 	 		}
 	 	}

@@ -37,6 +37,8 @@
  	fit_range local_range;
  	// gevp plateau fit range
  	fit_range gevp_range;
+    // sin2d vs (E,mpi) fit range
+    fit_range sin2d_range;
  };
 
  std::ostream& operator<<(std::ostream& os, const analysis_parameters& p);

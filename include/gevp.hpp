@@ -9,6 +9,7 @@
 #define GEVP_HPP
 
  #include "LQCDA.hpp"
+ #include "utils.hpp"
 
  #include <gsl/gsl_math.h>
  #include <complex>
@@ -51,6 +52,7 @@
  LQCDA::Sample<LQCDA::Matrix<double>> fitSin2d(
  	const LQCDA::Matrix<double>& gevp_plat, 
  	const LQCDA::Sample<LQCDA::Matrix<double>>& rs_sin2d, 
- 	const LQCDA::Sample<double>& rs_pi_plat);
+ 	const LQCDA::Sample<double>& rs_pi_plat,
+    const fit_range& range = fit_range());
 
 #endif // GEVP_HPP

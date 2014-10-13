@@ -32,7 +32,8 @@
  	<< "t0 = " << p.t0 << endl
  	<< "nboot = " << p.nboot << endl
     << "local fit range = {" << p.local_range.tmin << ", " << p.local_range.tmax << "}" << endl
-    << "gevp fit range = {" << p.gevp_range.tmin << ", " << p.gevp_range.tmax << "}" << endl;
+    << "gevp fit range = {" << p.gevp_range.tmin << ", " << p.gevp_range.tmax << "}" << endl
+    << "sin2d fit range = {" << p.sin2d_range.tmin << ", " << p.sin2d_range.tmax << "}" << endl;
     return os;
  }
 
@@ -222,7 +223,8 @@
     Matrix<double> gevp_t = gevp_corr_sample[0].col(0);
     gevp_corr_sample = gevp_corr_sample.block(0, 1, gevp_corr_sample.rows(), gevp_corr_sample.cols()-1);
 
-    int ngev = sqrt((gevp_corr_sample[0].cols() - 1) / 2);
+    int ngev = sqrt((gevp_corr_sample[0].cols()) / 2);
+    out << "ngev=" << ngev << endl;
 
     // Resample ViVi correlators
     out << "resampling... ";
@@ -438,14 +440,26 @@
     out << endl
     << "--------------------------------------------------------------------" << endl
     << "Performing Luscher analysis with sin^2(delta) fit :" << endl;
-cout << rs_sin2d[0](4, 0) << endl;
-    Sample<Matrix<double>> rs_g2_mrho2_from_fit = fitSin2d(gevp_plat, rs_sin2d, rs_pi_plat);
-    Sample<double> rs_g_from_fit(params.nboot);
-    Sample<double> rs_mrho_from_fit(params.nboot);
-    FOR_SAMPLE(rs_g_from_fit, s)
+    Sample<Matrix<double>> rs_g2_mrho2_from_fit = fitSin2d(gevp_plat, rs_sin2d, rs_pi_plat, params.sin2d_range);
+
+    // We keep only bootstraps with relative fit errors < 20%
+    std::vector<unsigned int> usable_boot;
+    usable_boot.reserve(params.nboot);
+    FOR_SAMPLE(rs_g2_mrho2_from_fit, s)
     {
-        rs_g_from_fit[s] = sqrt(rs_g2_mrho2_from_fit[s](0, 0));
-        rs_mrho_from_fit[s] = sqrt(rs_g2_mrho2_from_fit[s](0, 1));
+        double g2_rel_err = rs_g2_mrho2_from_fit[s](1, 0) / rs_g2_mrho2_from_fit[s](0, 0);
+        double mrho2_rel_err = rs_g2_mrho2_from_fit[s](1, 1) / rs_g2_mrho2_from_fit[s](0, 1);
+        double rel_err_threshold = 1.;
+        if(g2_rel_err < rel_err_threshold && mrho2_rel_err < rel_err_threshold)
+            usable_boot.push_back(s);
+    }
+
+    Sample<double> rs_g_from_fit(usable_boot.size());
+    Sample<double> rs_mrho_from_fit(usable_boot.size());
+    FOR_SAMPLE(rs_g_from_fit, i)
+    {
+        rs_g_from_fit[i] = sqrt(rs_g2_mrho2_from_fit[usable_boot[i]](0, 0));
+        rs_mrho_from_fit[i] = sqrt(rs_g2_mrho2_from_fit[usable_boot[i]](0, 1));
     }
 
     double g_from_fit = rs_g_from_fit.mean();
@@ -454,11 +468,12 @@ cout << rs_sin2d[0](4, 0) << endl;
     double mrho_err_from_fit = rs_mrho_from_fit.variance();
 
     out << "Coupling parameters from sin^2(delta) fit : " << endl
+    << usable_boot.size() << " bootstraps usable" << endl
     << "g = " << g_from_fit
     << " +- " <<  sqrt(g_err_from_fit)
     << endl
     << "Mrho = " << mrho_from_fit << " (" << GeV(mrho_from_fit, params.beta) << " GeV)"
-    << " +- " << mrho_err_from_fit << " (" << GeV(sqrt(mrho_err_from_fit), params.beta) << " GeV)"
+    << " +- " << sqrt(mrho_err_from_fit) << " (" << GeV(sqrt(mrho_err_from_fit), params.beta) << " GeV)"
     << endl;
     out << "--------------------------------------------------------------------" << endl << endl;
 

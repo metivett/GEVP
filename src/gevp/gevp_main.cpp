@@ -55,7 +55,7 @@
  	("help", "print help message");
 	// ("inputlist", po::value<std::string>(), "process list of input files")
 
-	fit_range local_range, gevp_range;	
+	fit_range local_range, gevp_range, sin2d_range;	
 
  	po::options_description parameters("Parameters");
  	parameters.add_options()
@@ -68,6 +68,7 @@
  	("nboot", po::value<unsigned int>(&nBootstraps)->default_value(2000), "set number of bootstraps used for statistical resampling analysis")
  	("loc-fit-range", po::value(&local_range), "set fit range for local ops plateaus")
  	("gevp-fit-range", po::value(&gevp_range), "set fit range for gevp ops plateaus")
+    ("sin2d-fit-range", po::value(&sin2d_range), "set fit range for sin2d vs (E,mpi) fit")
  	;
 
  	po::options_description hidden("Parameters");
@@ -99,7 +100,8 @@
  		vm["t0"].as<unsigned int>(),
  		vm["nboot"].as<unsigned int>(),
  		local_range,
- 		gevp_range
+ 		gevp_range,
+        sin2d_range
  	};
  	
  	return analyze(vm["inputfile"].as<std::string>(), params);

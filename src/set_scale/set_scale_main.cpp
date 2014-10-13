@@ -90,7 +90,11 @@ int main(int argc, char **argv)
 
     cout << "********************************************************************" << endl
          << "Scale setting:" << endl
-         << "a = " << result.a << " +- " << result.a_err << endl;
+         << "a = " << result.a << " +- " << result.a_err << " GeV-1" << endl
+         << "  = " << result.a * 0.197420751 << " +- " << result.a_err * 0.197420751 << " fm" << endl
+         << endl
+         << "a^-1 = " << result.a_inv << " +- " << result.a_inv_err << " GeV" << endl
+         ;
 
     return 0;
 }
