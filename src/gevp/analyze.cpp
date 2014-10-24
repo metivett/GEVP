@@ -442,14 +442,14 @@
     << "Performing Luscher analysis with sin^2(delta) fit :" << endl;
     Sample<Matrix<double>> rs_g2_mrho2_from_fit = fitSin2d(gevp_plat, rs_sin2d, rs_pi_plat, params.sin2d_range);
 
-    // We keep only bootstraps with relative fit errors < 20%
+    double rel_err_threshold = 1.;
+    // We keep only bootstraps with relative fit errors < rel_err_threshold
     std::vector<unsigned int> usable_boot;
     usable_boot.reserve(params.nboot);
     FOR_SAMPLE(rs_g2_mrho2_from_fit, s)
     {
         double g2_rel_err = rs_g2_mrho2_from_fit[s](1, 0) / rs_g2_mrho2_from_fit[s](0, 0);
         double mrho2_rel_err = rs_g2_mrho2_from_fit[s](1, 1) / rs_g2_mrho2_from_fit[s](0, 1);
-        double rel_err_threshold = 1.;
         if(g2_rel_err < rel_err_threshold && mrho2_rel_err < rel_err_threshold)
             usable_boot.push_back(s);
     }

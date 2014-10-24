@@ -1,4 +1,6 @@
-CC = g++
+# CC = g++-4.9
+CC = g++-4.7
+# CC = clang
 
 CFLAGS = -O2 -std=c++11 -g
 LDFLAGS = -fopenmp
@@ -17,6 +19,7 @@ LIBS += -lboost_system
 LIBS += -lboost_filesystem
 LIBS += -lgsl -lgslcblas
 LIBS += -lgrace_np
+LIBS += -lm
 
 SRC_DIR = ./src
 COMMON_OBJ_FILES = plateau.o utils.o
