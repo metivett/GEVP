@@ -65,7 +65,9 @@
  	("frame", po::value<unsigned int>()->default_value(0), "set type of analysis (COM or MV)")
 	// ("t1", po::value<int>(), "if t1 > 0, apply t1-trick exponential correction")
  	("beta", po::value<double>()->default_value(0.), "provide optional beta value to convert lattices units into physical units")
+    ("fold-corr", po::value<bool>()->default_value(false), "fold correlators")
  	("nboot", po::value<unsigned int>(&nBootstraps)->default_value(2000), "set number of bootstraps used for statistical resampling analysis")
+    ("pi-manfile", po::value<std::string>()->default_value(""), "set alternative manfile for pion correlators")
  	("loc-fit-range", po::value(&local_range), "set fit range for local ops plateaus")
  	("gevp-fit-range", po::value(&gevp_range), "set fit range for gevp ops plateaus")
     ("sin2d-fit-range", po::value(&sin2d_range), "set fit range for sin2d vs (E,mpi) fit")
@@ -96,9 +98,11 @@
  		vm["L"].as<unsigned int>(),
  		vm["T"].as<unsigned int>(),
  		vm["beta"].as<double>(),
+        vm["fold-corr"].as<bool>(),
  		analysis_frame(vm["frame"].as<unsigned int>()),
  		vm["t0"].as<unsigned int>(),
  		vm["nboot"].as<unsigned int>(),
+        vm["pi-manfile"].as<std::string>(),
  		local_range,
  		gevp_range,
         sin2d_range

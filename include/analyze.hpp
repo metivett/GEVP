@@ -27,12 +27,16 @@
  	unsigned int L, T;
  	// beta
  	double beta;
+    // fold correlators
+    bool fold_corr;
  	// analysis frame
  	analysis_frame frame;
  	// GEVP t0
  	unsigned int t0;
  	// number of bootstrap samples
  	unsigned int nboot;
+    // pion correlators alternative manfile
+    std::string pi_manfile;
  	// local plateau fit range
  	fit_range local_range;
  	// gevp plateau fit range

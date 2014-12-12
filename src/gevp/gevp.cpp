@@ -147,13 +147,16 @@ Sample<Matrix<double>> fitSin2d(
     Chi2Fit<double, MIN::MIGRAD> Fit;
     Fit.options.verbosity = SILENT;
 
-    double chi2_dof = 0.;
+    Sample<double> rschi2_dof(nboot);
 
     std::vector<double> g2_mrho2_init = {36, 0.22};
     // std::vector<double> g2_mrho2_init = {20., 0.23};
     // std::vector<double> g2_mrho2_init = {36., 0.075};
     // std::vector<double> g2_mrho2_init = {36., 0.275};
     // std::vector<double> g2_mrho2_init = {60., 0.119};
+    
+    ScalarConstraint<double> g2Limits;
+    g2Limits.setBounds(20., 50);
 
     // Test: fit mean
     Chi2Fit<double, MIN::MIGRAD> MeanFit;
@@ -161,8 +164,8 @@ Sample<Matrix<double>> fitSin2d(
     auto meandata = sin2d_vs_E_mpi->mean();
     MeanFit.setData(meandata);
     MeanFit.fitPointRange(range.tmin, range.tmax, true);
-    auto meanfit = MeanFit.fit(*model, g2_mrho2_init);
-    std::cout << "mean fit: " << std::endl
+    auto meanfit = MeanFit.fit(*model, g2_mrho2_init, {g2Limits, ScalarConstraint<double>()});
+    std::cout << "mean fit: " << meanfit.isValid() << std::endl
               << "g2=" << meanfit.parameters()[0] 
               << " mrho2=" << meanfit.parameters()[1]<< std::endl;
 
@@ -190,7 +193,7 @@ Sample<Matrix<double>> fitSin2d(
             result[n](1, 0) = fabs(fit.errors()[0]);
             result[n](1, 1) = fabs(fit.errors()[1]);
 
-            chi2_dof += fit.cost() / fit.nDOF();
+            rschi2_dof[n] = fit.cost() / fit.nDOF();;
         }
         else
         {
@@ -199,22 +202,23 @@ Sample<Matrix<double>> fitSin2d(
             fixedValue.fixValue(g2_mrho2_from_mean[0]);
             auto fitMrho2 = Fit.fit(*model, {36, fabs(fit.parameters()[1])}, {fixedValue, ScalarConstraint<double>()});
 
-            std::cout << fitMrho2.isValid() << " mrho2=" << fitMrho2.parameters()[1] << " ";
+            // std::cout << fitMrho2.isValid() << " mrho2=" << fitMrho2.parameters()[1] << " ";
 
             // Fit g2 with obtained value for Mrho2 fixed
             fixedValue.fixValue(fabs(fitMrho2.parameters()[1]));
             auto fitg2 = Fit.fit(*model, {fabs(fit.parameters()[0]), fabs(g2_mrho2_from_mean[1])}, {ScalarConstraint<double>(), fixedValue});
 
-            std::cout << fitg2.isValid() << " g2=" << fitg2.parameters()[0] << " ";
+            // std::cout << fitg2.isValid() << " g2=" << fitg2.parameters()[0] << " ";
 
             // Complete fit with obtained initial values
             std::vector<double> g2_mrho2_init2 = {fabs(fitg2.parameters()[0]), fabs(fitMrho2.parameters()[1])};
             auto fit2 = Fit.fit(*model, g2_mrho2_init2);
 
-            std::cout << fit2.isValid() << std::endl;
+            // std::cout << fit2.isValid() << std::endl;
             // std::cout << fit2.isValid() << "\t" << sqrt(fabs(fit2.parameters()[0])) << "\t" << fabs(fit2.errors()[0])/fabs(fit2.parameters()[0]) << std::endl;
 
-            chi2_dof += fit2.cost() / fit2.nDOF();
+            rschi2_dof[n] = fit2.cost() / fit2.nDOF();
+
             if (fit2.isValid())
             {
                 result[n](0, 0) = fabs(fit2.parameters()[0]);
@@ -231,8 +235,15 @@ Sample<Matrix<double>> fitSin2d(
             }
         }
     }
-    chi2_dof /= nboot;
-    std::cout << "chi2/dof = " << chi2_dof << std::endl;
+
+    std::cout << "chi2/dof = " << rschi2_dof.mean() << std::endl;
+
+    // write chi2
+    std::ofstream chi2ofile("chi2_sin2d.boot");
+    FOR_SAMPLE(rschi2_dof, s)
+    {
+        chi2ofile << rschi2_dof[s] << std::endl;
+    }
 
     delete sin2d_vs_E_mpi;
     delete model;

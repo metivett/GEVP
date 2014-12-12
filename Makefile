@@ -22,10 +22,11 @@ LIBS += -lgrace_np
 LIBS += -lm
 
 SRC_DIR = ./src
-COMMON_OBJ_FILES = plateau.o utils.o
+COMMON_OBJ_FILES = extract.o hadron.o plateau.o utils.o
 GEVP_OBJ_FILES = Z001.o gevp.o analyze.o gevp_main.o
 SET_SCALE_OBJ_FILES = set_scale.o set_scale_main.o
-EXTRACT_OBJ_FILES = extract.o extract_main.o
+EXTRACT_OBJ_FILES = extract_main.o
+RHO_FIT_OBJ_FILES = rho_fit.o
 
 .PHONY: all clean
 
@@ -59,6 +60,13 @@ extract: $(COMMON_OBJ_FILES) $(EXTRACT_OBJ_FILES)
 	@echo 'Finished building target $@'
 	@echo ' '
 
+rho_fit: $(COMMON_OBJ_FILES) $(RHO_FIT_OBJ_FILES)
+	@echo 'Building target $@'
+	@echo 'Invoking GCC C++ Linker'
+	$(CC) $(LDFLAGS) -o $@ $(COMMON_OBJ_FILES) $(RHO_FIT_OBJ_FILES) $(LIBS)
+	@echo 'Finished building target $@'
+	@echo ' '
+
 $(COMMON_OBJ_FILES): %.o: $(SRC_DIR)/common/%.cpp
 	@echo 'Building file $<'
 	@echo 'Invoking GCC C++ Compiler'
@@ -81,6 +89,13 @@ $(SET_SCALE_OBJ_FILES): %.o: $(SRC_DIR)/set_scale/%.cpp
 	@echo ' '
 
 $(EXTRACT_OBJ_FILES): %.o: $(SRC_DIR)/extract/%.cpp
+	@echo 'Building file $<'
+	@echo 'Invoking GCC C++ Compiler'
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
+	@echo 'Finished building: $<'
+	@echo ' '
+
+$(RHO_FIT_OBJ_FILES): %.o: $(SRC_DIR)/rho_fit/%.cpp
 	@echo 'Building file $<'
 	@echo 'Invoking GCC C++ Compiler'
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
